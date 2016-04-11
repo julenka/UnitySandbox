@@ -1,14 +1,16 @@
-﻿Shader "Hidden/Grayscale"
+﻿Shader "Hidden/Vertices"
 {
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
+        _MainTex2("Texture2", 2D) = "white" {}
     }
         SubShader
     {
         Pass
         {
             CGPROGRAM
+            #pragma glsl
             #pragma vertex vert
             #pragma fragment frag
 
@@ -26,28 +28,30 @@
                 float4 vertex : SV_POSITION;
             };
 
+            sampler2D _MainTex;
+            sampler2D _MainTex2;
+
             v2f vert(appdata v)
             {
+                float4 tex = tex2Dlod(_MainTex, float4(v.uv, 0, 0));
+                v.vertex.y += tex.r / 0.1f;
+
                 v2f o;
                 o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
                 o.uv = v.uv;
+
+
+
                 return o;
             }
 
-            sampler2D _MainTex;
-
             fixed4 frag(v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv);
-                col.r /= 0.03f;
-                col.g = col.r;
-                col.b = col.r;
-
+                fixed4 col = tex2D(_MainTex2, i.uv);
                 // just invert the colors
-                col = 1 - col;
-
+                // col = 1 - col;
                 return col;
-        }
+            }
         ENDCG
     }
     }

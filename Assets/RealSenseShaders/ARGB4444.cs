@@ -13,11 +13,13 @@ namespace UnitySandbox.RealSenseShaders
             texture = new Texture2D(TestData.DATA_WIDTH, TestData.DATA_HEIGHT, TextureFormat.ARGB4444, false);
             texture.name = "TestData ARGB4444";
             GetComponent<MeshRenderer>().material.mainTexture = texture;
-
-            // fill the texture
-            texture.LoadRawTextureData(TestData.TestImage);
-            texture.Apply();
         }
 
+        void Update()
+        {
+            // fill the texture
+            texture.LoadRawTextureData(TestData.TestImage2);
+            texture.Apply();
+        }
     }
 }

@@ -14,8 +14,12 @@ namespace UnitySandbox.RealSenseShaders
             texture.name = "TestData Grayscale";
             GetComponent<MeshRenderer>().material.mainTexture = texture;
 
+        }
+
+        void Update()
+        {
             // fill the texture
-            texture.LoadRawTextureData(TestData.TestImage);
+            texture.LoadRawTextureData(TestData.TestImage2);
             texture.Apply();
         }
 
