@@ -45,7 +45,7 @@ namespace UnitySandbox.RealSenseShaders
         {
             UpdateTestImage2();
         }
-
+        public float TimeMultiplier = 1.0f;
         private void UpdateTestImage2()
         {
             float t = Time.realtimeSinceStartup;
@@ -57,7 +57,7 @@ namespace UnitySandbox.RealSenseShaders
                 {
                     float xf = (float)x / DATA_WIDTH;
                     float yf = (float)y / DATA_HEIGHT;
-                    ushort value = (ushort)(Mathf.Sin(5 * xf + t) * Mathf.Cos(5 * yf + t) * 1024 + 2048);
+                    ushort value = (ushort)(Mathf.Sin(5 * xf + t * TimeMultiplier) * Mathf.Cos(5 * yf + t * TimeMultiplier) * 1024 + 1024);
                     bw.Write(value);
                 }
             }

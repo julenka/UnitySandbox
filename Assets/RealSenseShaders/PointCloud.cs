@@ -20,9 +20,10 @@ namespace UnitySandbox.RealSenseShaders
         {
             m_texture = new Texture2D(TestData.DATA_WIDTH, TestData.DATA_HEIGHT, TextureFormat.R16, false);
             m_texture.name = "TestData Grayscale";
+            m_texture.wrapMode = TextureWrapMode.Clamp;
             GetComponent<MeshRenderer>().material.mainTexture = m_texture;
 
-            GetComponent<MeshFilter>().mesh = MakeMesh(100);
+            GetComponent<MeshFilter>().mesh = MakeMesh(25);
 
             mIsOpenGL = SystemInfo.graphicsDeviceVersion.Contains("OpenGL");
         }
