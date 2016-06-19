@@ -23,7 +23,7 @@ namespace UnitySandbox.RealSenseShaders
             m_texture.wrapMode = TextureWrapMode.Clamp;
             GetComponent<MeshRenderer>().material.mainTexture = m_texture;
 
-            GetComponent<MeshFilter>().mesh = MakeMesh(25);
+            GetComponent<MeshFilter>().mesh = MakeMesh(200);
 
             mIsOpenGL = SystemInfo.graphicsDeviceVersion.Contains("OpenGL");
         }

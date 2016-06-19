@@ -5,7 +5,7 @@
         _MainTex("Texture", 2D) = "white" {}
         _MainTex2("Texture2", 2D) = "white" {}
     }
-        SubShader
+    SubShader
     {
         Pass
         {
