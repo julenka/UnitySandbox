@@ -7,8 +7,10 @@ public class RippleGrid : MonoBehaviour
     public void Awake()
     {
         Instance = this;
+        Generate();
     }
-    public int m_gridWidth, m_gridHeight, m_cellWidth, m_cellHeight;
+    public int m_gridWidth, m_gridHeight;
+    public float m_cellWidth, m_cellHeight;
     // Cube prefab has:
     // Spring
     // RigidBody
@@ -32,8 +34,7 @@ public class RippleGrid : MonoBehaviour
 
 
 
-    // Use this for initialization
-    void Start()
+    void Generate()
     {
         // make the grid of cubes
         m_cubes = new GameObject[m_gridHeight, m_gridWidth];

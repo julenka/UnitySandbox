@@ -28,7 +28,7 @@ public class RippleCube : MonoBehaviour
             );
         }
     }
-
+    public float m_spring = 1000;
     public void SetNeighbors(GameObject[] neighbors)
     {
         for (int k = 0; k < neighbors.Length; k++)
@@ -41,7 +41,10 @@ public class RippleCube : MonoBehaviour
             }
             var spring = gameObject.AddComponent<SpringJoint>();
             spring.connectedBody = neighbor.GetComponent<Rigidbody>();
-            spring.spring = 1000;
+            spring.spring = m_spring;
+            spring.damper = 100f;
+            //spring.minDistance = 0f;
+            //spring.maxDistance = 1.5f;
 
             if (m_animate)
             {
