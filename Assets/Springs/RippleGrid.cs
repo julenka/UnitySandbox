@@ -18,7 +18,9 @@ public class RippleGrid : MonoBehaviour
 
     public GameObject[,] m_cubes;
 
-    public bool m_wrap, m_fixedEdges, m_fixedCorners;
+    public bool m_wrap;
+    public Vector2[] m_fixedPoints;
+    public uint[] m_fixedRows, m_fixedCols;
 
     public float Period = 5;
     public float Amplitude = 5;
@@ -32,7 +34,38 @@ public class RippleGrid : MonoBehaviour
             m_cellWidth * (m_gridWidth - 1), m_cellHeight * (m_gridHeight - 1), m_cellHeight));
     }
 
+    public GameObject GetCubeByIndex(int i)
+    {
+        return m_cubes[i / m_gridWidth, i % m_gridWidth];
+    }
 
+    private void SetIsKinematic(RippleCube rippleCube, int row, int col)
+    {
+        // check coordinates
+        foreach (var item in m_fixedPoints)
+        {
+            if (item.x == col && item.y == row)
+            {
+                rippleCube.m_isKinematic = true;
+            }
+        }
+        // check row
+        foreach (var r in m_fixedRows)
+        {
+            if (r == row)
+            {
+                rippleCube.m_isKinematic = true;
+            }
+        }
+        foreach (var c in m_fixedCols)
+        {
+            if (c == col)
+            {
+                rippleCube.m_isKinematic = true;
+            }
+        }
+        // check column
+    }
 
     void Generate()
     {
@@ -51,23 +84,9 @@ public class RippleGrid : MonoBehaviour
                 c.transform.parent = transform;
                 c.transform.localPosition = pos;
 
-                if (m_fixedEdges)
-                {
-                    if (i == 0 || j == 0 || i == m_gridHeight - 1 || j == m_gridWidth - 1)
-                    {
-                        c.GetComponent<RippleCube>().m_isKinematic = true;
-                    }
-                }
-                if (m_fixedCorners)
-                {
-                    if (i == 0 && j == 0 ||
-                        i == m_gridHeight - 1 && j == m_gridWidth - 1 ||
-                        i == 0 && j == m_gridWidth - 1 ||
-                        i == m_gridHeight - 1 && j == 0)
-                    {
-                        c.GetComponent<RippleCube>().m_isKinematic = true;
-                    }
-                }
+                SetIsKinematic(c.GetComponent<RippleCube>(), i, j);
+
+
                 //if (m_animate && i == m_gridHeight / 2 && j == m_gridWidth / 2)
                 if (m_animate && i == 0 / 2 && j == 0 / 2)
                 {
@@ -105,6 +124,11 @@ public class RippleGrid : MonoBehaviour
             {
                 r = Mathf.Clamp(row + dys[i], 0, m_gridHeight - 1);
                 c = Mathf.Clamp(col + dxs[i], 0, m_gridWidth - 1);
+            }
+            if (r < row || c < col)
+            {
+                r = row;
+                c = col;
             }
             result[i] = m_cubes[r, c].gameObject;
         }

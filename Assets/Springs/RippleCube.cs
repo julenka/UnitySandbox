@@ -6,8 +6,17 @@ public class RippleCube : MonoBehaviour
 {
     public GameObject[] m_neighbors;
     public bool m_isKinematic = false;
-
     public bool m_animate = false;
+    public float m_spring = 1000;
+    public float m_damper = 1000;
+    public enum JointType
+    {
+        Spring,
+        Fixed,
+        Hinge
+    };
+    public JointType JointToUse;
+
 
     public void Start()
     {
@@ -23,12 +32,30 @@ public class RippleCube : MonoBehaviour
             transform.localPosition =
                 new Vector3
                 (transform.localPosition.x,
-                transform.localPosition.y,
-                z
+                z,
+                transform.localPosition.z
             );
         }
+        UpdateJoints();
     }
-    public float m_spring = 1000;
+
+    private void UpdateJoints()
+    {
+        foreach (var neighbor in m_neighbors)
+        {
+            if (neighbor == null)
+            {
+                continue;
+            }
+            var spring = neighbor.GetComponent<SpringJoint>();
+            if (spring != null)
+            {
+                spring.spring = m_spring;
+                spring.damper = m_damper;
+            }
+        }
+    }
+
     public void SetNeighbors(GameObject[] neighbors)
     {
         for (int k = 0; k < neighbors.Length; k++)
@@ -39,12 +66,8 @@ public class RippleCube : MonoBehaviour
                 neighbors[k] = null;
                 continue;
             }
-            var spring = gameObject.AddComponent<SpringJoint>();
+            var spring = GetSpringObject();
             spring.connectedBody = neighbor.GetComponent<Rigidbody>();
-            spring.spring = m_spring;
-            spring.damper = 100f;
-            //spring.minDistance = 0f;
-            //spring.maxDistance = 1.5f;
 
             if (m_animate)
             {
@@ -66,4 +89,27 @@ public class RippleCube : MonoBehaviour
             Gizmos.DrawCube(item.transform.position, Vector3.one * 0.3f);
         }
     }
+
+    private Joint GetSpringObject()
+    {
+        if (JointToUse == JointType.Fixed)
+        {
+            var result = gameObject.AddComponent<FixedJoint>();
+            return result;
+        }
+        else if (JointToUse == JointType.Hinge)
+        {
+            var result = gameObject.AddComponent<HingeJoint>();
+            return result;
+        }
+        else
+        {
+            var result = gameObject.AddComponent<SpringJoint>();
+            result.spring = m_spring;
+            result.damper = m_damper;
+            result.maxDistance = 2;
+            return result;
+        }
+    }
+
 }

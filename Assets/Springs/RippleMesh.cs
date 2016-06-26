@@ -8,6 +8,7 @@ public class RippleMesh : MonoBehaviour
     private Mesh mesh;
     private Vector3[] vertices;
     private RippleGrid grid;
+    public bool FaceBack = false;
 
     // Use this for initialization
     void Start()
@@ -22,21 +23,31 @@ public class RippleMesh : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.black;
         Gizmos.matrix = transform.localToWorldMatrix;
         if (vertices == null)
         {
             return;
         }
+
         for (int i = 0; i < vertices.Length; i++)
         {
+            var is_kinematic = grid.GetCubeByIndex(i).GetComponent<RippleCube>().m_isKinematic;
+            if (is_kinematic)
+            {
+                Gizmos.color = Color.green;
+            }
+            else
+            {
+                Gizmos.color = Color.black;
+            }
+
             Gizmos.DrawSphere(vertices[i], 0.1f);
         }
     }
 
     private void CreateTriangles()
     {
-        int[] triangles = new int[vertices.Length * 6];
+        int[] triangles = new int[vertices.Length * 12];
         int tIndex = 0;
         for (int row = 0; row < grid.m_gridHeight - 1; row++)
         {
@@ -46,7 +57,15 @@ public class RippleMesh : MonoBehaviour
                 var o10 = RowColToIndex(row + 1, col);
                 var o01 = RowColToIndex(row, col + 1);
                 var o11 = RowColToIndex(row + 1, col + 1);
-                tIndex = SetQuad(triangles, tIndex, o00, o10, o01, o11);
+                if (FaceBack)
+                {
+                    tIndex = SetQuad(triangles, tIndex, o00, o01, o10, o11);
+                }
+                else
+                {
+                    tIndex = SetQuad(triangles, tIndex, o00, o10, o01, o11);
+                }
+
             }
         }
         mesh.triangles = triangles;
