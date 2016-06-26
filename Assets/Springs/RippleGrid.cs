@@ -9,6 +9,7 @@ public class RippleGrid : MonoBehaviour
         Instance = this;
         Generate();
     }
+
     public int m_gridWidth, m_gridHeight;
     public float m_cellWidth, m_cellHeight;
     // Cube prefab has:
@@ -25,6 +26,8 @@ public class RippleGrid : MonoBehaviour
     public float Period = 5;
     public float Amplitude = 5;
     public bool m_animate;
+
+    public int OffsetKinematic = 0;
 
     public void OnDrawGizmos()
     {
