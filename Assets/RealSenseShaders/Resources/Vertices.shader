@@ -9,6 +9,7 @@
     {
         Pass
         {
+            Cull Off
             CGPROGRAM
             #pragma glsl
             #pragma vertex vert

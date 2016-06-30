@@ -34,7 +34,6 @@ namespace UnitySandbox.RealSenseShaders
                 }
             }
             bw.Flush();
-            bw.Close();
 
             TestImage2 = new byte[DATA_WIDTH * DATA_HEIGHT * BYTES_PER_PIXEL];
             UpdateTestImage2();
@@ -62,7 +61,6 @@ namespace UnitySandbox.RealSenseShaders
                 }
             }
             bw.Flush();
-            bw.Close();
         }
     }
 }

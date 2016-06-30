@@ -12,23 +12,23 @@ namespace UnitySandbox.RealSenseShaders
 {
     public class PointCloud : MonoBehaviour
     {
-
+        public int MeshSize = 250;
         private Texture2D m_texture;
-
+        private bool _mIsOpenGl;
         // Use this for initialization
-        void Start()
+        private void Start()
         {
             m_texture = new Texture2D(TestData.DATA_WIDTH, TestData.DATA_HEIGHT, TextureFormat.R16, false);
             m_texture.name = "TestData Grayscale";
             m_texture.wrapMode = TextureWrapMode.Clamp;
             GetComponent<MeshRenderer>().material.mainTexture = m_texture;
 
-            GetComponent<MeshFilter>().mesh = MakeMesh(200);
+            GetComponent<MeshFilter>().mesh = MakeMesh(MeshSize);
 
-            mIsOpenGL = SystemInfo.graphicsDeviceVersion.Contains("OpenGL");
+            _mIsOpenGl = SystemInfo.graphicsDeviceVersion.Contains("OpenGL");
         }
 
-        void Update()
+        private void Update()
         {
             // fill the texture
             m_texture.LoadRawTextureData(TestData.TestImage2);
@@ -68,8 +68,8 @@ namespace UnitySandbox.RealSenseShaders
         }
 
         // http://www.kamend.com/2014/05/rendering-a-point-cloud-inside-unity/
-        const UInt32 GL_VERTEX_PROGRAM_POINT_SIZE = 0x8642;
-        const UInt32 GL_POINT_SMOOTH = 0x0B10;
+        const uint GL_VERTEX_PROGRAM_POINT_SIZE = 0x8642;
+        const uint GL_POINT_SMOOTH = 0x0B10;
 
         const string LibGLPath = "opengl32.dll";
 
