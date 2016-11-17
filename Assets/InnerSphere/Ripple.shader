@@ -1,4 +1,6 @@
-﻿Shader "Custom/Ripple"
+﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+Shader "Custom/Ripple"
 {
     Properties
     {
@@ -48,7 +50,7 @@
                 {
                     v2f o;
                     o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-                    o.vertex_world = mul(_Object2World, v.vertex);
+                    o.vertex_world = mul(unity_ObjectToWorld, v.vertex);
                     o.uv = v.uv;
                     return o;
                 }
