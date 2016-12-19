@@ -3,14 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
-
-
-public class Tesseract : MonoBehaviour
+[RequireComponent(typeof(ParticleSystem))]
+public class ParticlesTesseract : MonoBehaviour
 {
-    MeshFilter meshFilter;
-    Mesh mesh;
+    ParticleSystem.Particle[] particles;
 
     public List<Vector4> originalVerts;
     public List<Vector4> rotatedVerts;
@@ -24,7 +20,7 @@ public class Tesseract : MonoBehaviour
     public List<Axis4D> rotationOrder;
     public Dictionary<Axis4D, float> rotation;
 
-    void Start()
+    void InitializeTesseract()
     {
         rotationOrder = new List<Axis4D>();
         rotationOrder.Add(Axis4D.yz);
@@ -41,16 +37,6 @@ public class Tesseract : MonoBehaviour
         rotation.Add(Axis4D.yz, 0f);
         rotation.Add(Axis4D.yw, 0f);
         rotation.Add(Axis4D.zw, 0f);
-
-
-        meshFilter = GetComponent<MeshFilter>();
-        mesh = meshFilter.sharedMesh;
-        if (mesh == null)
-        {
-            meshFilter.mesh = new Mesh();
-            mesh = meshFilter.sharedMesh;
-        }
-
 
         originalVerts = new List<Vector4>(){
             new Vector4(1,1,1,1),
@@ -74,14 +60,46 @@ public class Tesseract : MonoBehaviour
         ResetVertices();
     }
 
-    Vector3 cameraPos = new Vector3(0, 0, -6);
+    void InitializeParticles()
+    {
+        if(verts == null)
+        {
+            InitializeTesseract();
+        }
+        particles = new ParticleSystem.Particle[rotatedVerts.Count];
+        for (int i = 0; i < rotatedVerts.Count; i++)
+        {
+            particles[i] = new ParticleSystem.Particle();
+        }
+    }
+
+    void UpdateParticles()
+    {
+        if (rotatedVerts == null)
+        {
+            InitializeTesseract();
+            InitializeParticles();
+        }
+        for (int i = 0; i < rotatedVerts.Count; i++)
+        {
+            particles[i].position = rotatedVerts[i];
+            particles[i].color = Color.white;
+            particles[i].size = 1f;
+        }
+        GetComponent<ParticleSystem>().SetParticles(particles, particles.Length);
+    }
+
+    void Awake()
+    {
+        if (particles == null)
+        {
+            InitializeTesseract();
+            InitializeParticles();
+        }
+    }
+
     void Update()
     {
-        cameraPos.z += Input.GetAxis("Mouse ScrollWheel") * 2f;
-        Camera.main.transform.position = cameraPos;
-        Camera.main.orthographicSize = -(cameraPos.z + 4);
-        //Rotate(Axis4D.yw,0.06f);
-        //Rotate(Axis4D.yz,0);
         DrawTesseract();
     }
 
@@ -123,90 +141,7 @@ public class Tesseract : MonoBehaviour
 
     void DrawTesseract()
     {
-        mesh.Clear();
-        verts = new List<Vector3>();
-        tris = new List<int>();
-        uvs = new List<Vector2>();
-
-        CreatePlane(rotatedVerts[0], rotatedVerts[1], rotatedVerts[5], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[6], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[8], rotatedVerts[12], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[3], rotatedVerts[1]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[1], rotatedVerts[9], rotatedVerts[8]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[10], rotatedVerts[8]);
-
-        CreatePlane(rotatedVerts[1], rotatedVerts[3], rotatedVerts[7], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[1], rotatedVerts[9], rotatedVerts[13], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[1], rotatedVerts[3], rotatedVerts[9], rotatedVerts[11]);
-
-        CreatePlane(rotatedVerts[2], rotatedVerts[3], rotatedVerts[7], rotatedVerts[6]);
-        CreatePlane(rotatedVerts[2], rotatedVerts[3], rotatedVerts[10], rotatedVerts[11]);
-        CreatePlane(rotatedVerts[2], rotatedVerts[10], rotatedVerts[14], rotatedVerts[6]);
-
-        CreatePlane(rotatedVerts[3], rotatedVerts[11], rotatedVerts[15], rotatedVerts[7]);
-
-        CreatePlane(rotatedVerts[4], rotatedVerts[12], rotatedVerts[13], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[4], rotatedVerts[6], rotatedVerts[14], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[4], rotatedVerts[6], rotatedVerts[7], rotatedVerts[5]);
-
-        CreatePlane(rotatedVerts[5], rotatedVerts[7], rotatedVerts[15], rotatedVerts[13]);
-
-        CreatePlane(rotatedVerts[6], rotatedVerts[7], rotatedVerts[14], rotatedVerts[15]);
-
-        CreatePlane(rotatedVerts[8], rotatedVerts[10], rotatedVerts[14], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[8], rotatedVerts[9], rotatedVerts[13], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[8], rotatedVerts[9], rotatedVerts[10], rotatedVerts[11]);
-
-        CreatePlane(rotatedVerts[9], rotatedVerts[11], rotatedVerts[15], rotatedVerts[13]);
-
-        CreatePlane(rotatedVerts[10], rotatedVerts[11], rotatedVerts[15], rotatedVerts[14]);
-
-    }
-
-
-    void CreatePlane(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
-    {
-        Vector2 uv0 = Vector2.zero;
-        Vector2 uv1 = Vector2.zero;
-        Vector2 uv2 = Vector2.zero;
-
-
-        List<Vector3> newVerts = new List<Vector3>(){
-            p1,p3,p2,
-            p1,p2,p4,
-            p2,p3,p4,
-            p1,p4,p3
-        };
-
-        verts.AddRange(newVerts);
-        mesh.vertices = verts.ToArray();
-
-        int t = tris.Count;
-        for (int j = 0; j < 12; j++)
-        {
-            tris.Add(j + t);
-        }
-
-        mesh.SetTriangles(tris.ToArray(), 0);
-
-
-        uv0 = new Vector2(0, 0);
-        uv1 = new Vector2(1, 0);
-        uv2 = new Vector2(0.5f, 1);
-
-        uvs.AddRange(
-            new List<Vector2>(){
-                uv0,uv1,uv2,
-                uv0,uv1,uv2,
-                uv0,uv1,uv2,
-                uv0,uv1,uv2
-            }
-        );
-        mesh.uv = uvs.ToArray();
-
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-        ;
+        UpdateParticles();
     }
 
     Vector4 GetRotatedVertex(Axis4D axis, Vector4 v, float s, float c)
@@ -229,6 +164,7 @@ public class Tesseract : MonoBehaviour
 
         return new Vector4(0, 0, 0, 0);
     }
+
     void Rotate(Axis4D axis, float theta)
     {
         AddToRotationDictionary(axis, theta);
@@ -262,14 +198,5 @@ public class Tesseract : MonoBehaviour
         rotatedVerts.AddRange(originalVerts);
     }
 
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        for (int i = 0; i < rotatedVerts.Count; i++)
-        {
-            Gizmos.DrawSphere(rotatedVerts[i], 0.1f);
-        }
-
-
-    }
 }
+
