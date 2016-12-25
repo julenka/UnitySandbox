@@ -16,6 +16,27 @@ public enum Axis4D
 }
 class TesseractUtils
 {
+	public static Vector4 GetRotatedVertex(Axis4D axis, Vector4 v, float s, float c)
+	{
+		switch (axis)
+		{
+		case Axis4D.xy:
+			return TesseractUtils.RotateAroundXY(v, s, c);
+		case Axis4D.xz:
+			return TesseractUtils.RotateAroundXZ(v, s, c);
+		case Axis4D.xw:
+			return TesseractUtils.RotateAroundXW(v, s, c);
+		case Axis4D.yz:
+			return TesseractUtils.RotateAroundYZ(v, s, c);
+		case Axis4D.yw:
+			return TesseractUtils.RotateAroundYW(v, s, c);
+		case Axis4D.zw:
+			return TesseractUtils.RotateAroundZW(v, s, c);
+		}
+
+		return new Vector4(0, 0, 0, 0);
+	}
+
     public static Vector4 RotateAroundXY(Vector4 v, float s, float c)
     {
         float tmpX = c * v.x + s * v.y;
