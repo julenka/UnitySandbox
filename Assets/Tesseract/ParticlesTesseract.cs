@@ -7,6 +7,7 @@ using System;
 public class ParticlesTesseract : MonoBehaviour
 {
     ParticleSystem.Particle[] particles;
+    ParticleSystem particleSystem;
 
     public List<Vector4> originalVerts;
     public List<Vector4> rotatedVerts;
@@ -62,6 +63,7 @@ public class ParticlesTesseract : MonoBehaviour
 
     void InitializeParticles()
     {
+        particleSystem = GetComponent<ParticleSystem>();
         if(verts == null)
         {
             InitializeTesseract();
@@ -82,11 +84,17 @@ public class ParticlesTesseract : MonoBehaviour
         }
         for (int i = 0; i < rotatedVerts.Count; i++)
         {
-            particles[i].position = rotatedVerts[i];
-            particles[i].color = Color.white;
-            particles[i].size = 1f;
+            //particles[i].position = rotatedVerts[i];
+            //particles[i].color = Color.white;
+            //particles[i].size = 1f;
+            ParticleSystem.EmitParams p = new ParticleSystem.EmitParams();
+            p.position = rotatedVerts[i];
+            p.startSize = 1f;
+            p.startLifetime = 0.5f;
+            particleSystem.Emit(p, 1);
+
         }
-        GetComponent<ParticleSystem>().SetParticles(particles, particles.Length);
+        //GetComponent<ParticleSystem>().SetParticles(particles, particles.Length);
     }
 
     void Awake()
@@ -104,7 +112,6 @@ public class ParticlesTesseract : MonoBehaviour
     }
 
     bool freezeRotation = false;
-
     void OnGUI()
     {
 
