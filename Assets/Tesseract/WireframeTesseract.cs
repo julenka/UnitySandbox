@@ -79,9 +79,9 @@ public partial class WireframeTesseract : MonoBehaviour
         int i = 0;
         cubes = new CubeParams[8];
         cubes[i] = new CubeParams("red", cubeColors[i++], new int[] { 0, 1, 3, 6, 9, 15 });
-        cubes[i] = new CubeParams("green", cubeColors[i++], new int[] { 2, 4, 7, 13, 19, 23 });
-        cubes[i] = new CubeParams("blue", cubeColors[i++], new int[] { 27, 5, 8, 10, 20 });
-        cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 32, 33, 11, 12, 17, 22 });
+        cubes[i] = new CubeParams("green", cubeColors[i++], new int[] { 2, 4, 7, 13, 19, 24 });
+        cubes[i] = new CubeParams("blue", cubeColors[i++], new int[] { 28, 5, 8, 10, 20 });
+        cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 33, 34, 11, 12, 17, 22 });
         cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] {  });
         cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { });
         cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { });
@@ -114,7 +114,7 @@ public partial class WireframeTesseract : MonoBehaviour
             lineRenderer.numCapVertices = 5;
             lineRenderer.numCornerVertices = 5;
             lineRenderer.numPositions = 5;
-            lineRenderer.numCapVertices = 0;
+            lineRenderer.numCapVertices = 5;
             lineRenderer.numCornerVertices = 0;
             lineRenderer.useWorldSpace = false;
             gO.transform.parent = lineRedererRoot.transform;
