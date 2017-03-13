@@ -1,29 +1,54 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 
-public class WireframeTesseract : MonoBehaviour
+public partial class WireframeTesseract : MonoBehaviour
 {
-    public List<Vector4> originalVerts;
-    public List<Vector4> rotatedVerts;
-
-    public List<Axis4D> rotationOrder;
-    public Dictionary<Axis4D, float> rotation;
-
-    public bool freezeRotation = false;
-
-    GameObject textRoot;
     public TextMesh textPrefab;
 
-    // Line Renderer
-    public Color startColor, endColor;
-    float widthMultiplier = 0.02f;
-    GameObject lineRedererRoot;
+    [Header("Line Renderer")]
+    public Color lineColor;
 
-    // Drawing faces
-    int planeIndex = 0;
-    int numFaces = 23;
+    [Header("Debugging")]
+    [Range(0, 1)]
+    public float pushOutAmount = 0.01f;
+
+    List<Axis4D> rotationOrder;
+    public Dictionary<Axis4D, float> rotation;
+
+    List<Vector4> originalVerts;
+    List<Vector4> rotatedVerts;
+
+    public bool freezeRotation = false;
+    GameObject lineRedererRoot;
+    GameObject textRoot;
+
+    public FaceParams[] faces =
+    {
+        new FaceParams(0, 1, 5, 4),
+        new FaceParams(0, 2, 6, 4),
+        new FaceParams(0, 8, 12, 4),
+        new FaceParams(0, 2, 3, 1),
+        new FaceParams(0, 1, 9, 8),
+        new FaceParams(0, 2, 10, 8),
+        new FaceParams(1, 3, 7, 5),
+        new FaceParams(1, 9, 13, 5),
+        new FaceParams(1, 3, 11, 9),
+        new FaceParams(2, 3, 7, 6),
+        new FaceParams(2, 3, 11, 10),
+        new FaceParams(2, 10, 14, 6),
+        new FaceParams(3, 11, 15, 7),
+        new FaceParams(4, 12, 13, 5),
+        new FaceParams(4, 6, 14, 12),
+        new FaceParams(4, 6, 7, 5),
+        new FaceParams(5, 7, 15, 13),
+        new FaceParams(6, 7, 15, 14),
+        new FaceParams(8, 10, 14, 12),
+        new FaceParams(8, 9, 13, 12),
+        new FaceParams(8, 9, 11, 10),
+        new FaceParams(9, 11, 15, 13),
+        new FaceParams(10, 11, 15, 14)
+    };
 
 
     void Start()
@@ -79,32 +104,39 @@ public class WireframeTesseract : MonoBehaviour
         lineRedererRoot = new GameObject();
         lineRedererRoot.transform.parent = transform;
         lineRedererRoot.name = "line renderers";
-        for (int i = 0; i < numFaces; i++)
+        for (int i = 0; i < faces.Length; i++)
         {
             GameObject gO = new GameObject();
+            gO.name = "cube " + faces[i].faceGroup;
             LineRenderer lineRenderer = gO.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-            lineRenderer.widthMultiplier = widthMultiplier;
+            lineRenderer.widthMultiplier = 0.01f;
+            lineRenderer.numCapVertices = 5;
+            lineRenderer.numCornerVertices = 5;
             lineRenderer.numPositions = 5;
             lineRenderer.numCapVertices = 0;
             lineRenderer.numCornerVertices = 0;
             lineRenderer.useWorldSpace = false;
             gO.transform.parent = lineRedererRoot.transform;
-
-            // A simple 2 color gradient with a fixed alpha of 1.0f.
-            float alpha = 1.0f;
-            Gradient gradient = new Gradient();
-            gradient.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(startColor, 0.0f), new GradientColorKey(endColor, 1.0f) },
-                new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
-            );
-            lineRenderer.colorGradient = gradient;
+            lineRenderer.colorGradient = CreateGradient(lineColor, lineColor);
         }
+    }
+
+    private Gradient CreateGradient(Color startColor, Color endColor)
+    {
+        // A simple 2 color gradient with a fixed alpha of 1.0f.
+        float alpha = 1.0f;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(startColor, 0.0f), new GradientColorKey(endColor, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
+        );
+        return gradient;
     }
 
     void SetupText()
     {
-        if(textPrefab != null)
+        if (textPrefab != null)
         {
             textRoot = new GameObject();
             textRoot.transform.parent = transform;
@@ -125,7 +157,7 @@ public class WireframeTesseract : MonoBehaviour
         {
             GameObject o = textRoot.transform.GetChild(i).gameObject;
             o.transform.position = rotatedVerts[i];
-            o.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position - o.transform.position);
+            //o.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position - o.transform.position);
         }
     }
 
@@ -141,50 +173,24 @@ public class WireframeTesseract : MonoBehaviour
 
     void DrawTesseract()
     {
-        planeIndex = 0;
+        for (int i = 0; i < faces.Length; i++)
+        {
 
-        CreatePlane(rotatedVerts[0], rotatedVerts[1], rotatedVerts[5], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[6], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[8], rotatedVerts[12], rotatedVerts[4]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[3], rotatedVerts[1]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[1], rotatedVerts[9], rotatedVerts[8]);
-        CreatePlane(rotatedVerts[0], rotatedVerts[2], rotatedVerts[10], rotatedVerts[8]);
-
-        CreatePlane(rotatedVerts[1], rotatedVerts[3], rotatedVerts[7], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[1], rotatedVerts[9], rotatedVerts[13], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[1], rotatedVerts[3], rotatedVerts[11], rotatedVerts[9]);
-
-        CreatePlane(rotatedVerts[2], rotatedVerts[3], rotatedVerts[7], rotatedVerts[6]);
-        CreatePlane(rotatedVerts[2], rotatedVerts[3], rotatedVerts[11], rotatedVerts[10]);
-        CreatePlane(rotatedVerts[2], rotatedVerts[10], rotatedVerts[14], rotatedVerts[6]);
-
-        CreatePlane(rotatedVerts[3], rotatedVerts[11], rotatedVerts[15], rotatedVerts[7]);
-
-        CreatePlane(rotatedVerts[4], rotatedVerts[12], rotatedVerts[13], rotatedVerts[5]);
-        CreatePlane(rotatedVerts[4], rotatedVerts[6], rotatedVerts[14], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[4], rotatedVerts[6], rotatedVerts[7], rotatedVerts[5]);
-
-        CreatePlane(rotatedVerts[5], rotatedVerts[7], rotatedVerts[15], rotatedVerts[13]);
-
-        CreatePlane(rotatedVerts[6], rotatedVerts[7], rotatedVerts[15], rotatedVerts[14]);
-
-        CreatePlane(rotatedVerts[8], rotatedVerts[10], rotatedVerts[14], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[8], rotatedVerts[9], rotatedVerts[13], rotatedVerts[12]);
-        CreatePlane(rotatedVerts[8], rotatedVerts[9], rotatedVerts[11], rotatedVerts[10]);
-
-        CreatePlane(rotatedVerts[9], rotatedVerts[11], rotatedVerts[15], rotatedVerts[13]);
-
-        CreatePlane(rotatedVerts[10], rotatedVerts[11], rotatedVerts[15], rotatedVerts[14]);
+            FaceParams p = faces[i];
+            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], i, p.faceColor);
+        }
     }
 
-    void CreatePlane(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+    void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int faceIndex, Color color)
     {
-        LineRenderer r = lineRedererRoot.transform.GetChild(planeIndex++).GetComponent<LineRenderer>();
-        r.SetPosition(0, a);
-        r.SetPosition(1, b);
-        r.SetPosition(2, c);
-        r.SetPosition(3, d);
-        r.SetPosition(4, a);
+        Vector3 center = 0.25f * (a + b + c + d);
+        LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
+        r.colorGradient = CreateGradient(color, color);
+        r.SetPosition(0, a + center * pushOutAmount);
+        r.SetPosition(1, b + center * pushOutAmount);
+        r.SetPosition(2, c + center * pushOutAmount);
+        r.SetPosition(3, d + center * pushOutAmount);
+        r.SetPosition(4, a + center * pushOutAmount);
     }
 
 
@@ -216,13 +222,4 @@ public class WireframeTesseract : MonoBehaviour
         }
     }
 
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        for (int i = 0; i < rotatedVerts.Count; i++)
-        {
-            Gizmos.DrawSphere(rotatedVerts[i], 0.1f);
-        }
-    }
 }

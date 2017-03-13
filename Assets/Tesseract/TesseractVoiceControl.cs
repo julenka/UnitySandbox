@@ -19,7 +19,7 @@ public class TesseractVoiceControl : MonoBehaviour
             () => tesseract.transform.localScale *= 0.75f);
     }
 
-    void OnGUI()
+    void Update()
     {
         if (!tesseract.freezeRotation)
         {
