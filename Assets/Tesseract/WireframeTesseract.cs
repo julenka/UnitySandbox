@@ -23,6 +23,20 @@ public partial class WireframeTesseract : MonoBehaviour
     GameObject lineRedererRoot;
     GameObject textRoot;
 
+    public static Color[] cubeColors =
+    {
+        new Color(176, 30, 0), // red
+        new Color(119,185,0), // green
+        new Color(0, 106,193), // blue
+        new Color(193,0,79), // pink
+        new Color(255,152,29), // yellow
+        new Color(114, 0, 172), // purple
+        new Color(0, 216, 204), // cyan
+        new Color(99,47,0) // brown
+    };
+
+    public CubeParams[] cubes;
+
     public FaceParams[] faces =
     {
         new FaceParams(0, 1, 5, 4),
@@ -47,7 +61,8 @@ public partial class WireframeTesseract : MonoBehaviour
         new FaceParams(8, 9, 13, 12),
         new FaceParams(8, 9, 11, 10),
         new FaceParams(9, 11, 15, 13),
-        new FaceParams(10, 11, 15, 14)
+        new FaceParams(10, 11, 15, 14),
+        new FaceParams(0, 1, 2, 3)
     };
 
 
@@ -88,6 +103,12 @@ public partial class WireframeTesseract : MonoBehaviour
             new Vector4(-1,-1,-1,-1)
         };
 
+        cubes = new CubeParams[] {
+            new CubeParams("red",   cubeColors[0], new int[] { 0, 1, 3, 6, 9, 15 }),
+            new CubeParams("green", cubeColors[1], new int[] { 2, 4, 7, 13, 19 })
+        };
+
+
         ResetVertices();
         SetupLineRenderer();
         SetupText();
@@ -107,7 +128,7 @@ public partial class WireframeTesseract : MonoBehaviour
         for (int i = 0; i < faces.Length; i++)
         {
             GameObject gO = new GameObject();
-            gO.name = "cube " + faces[i].faceGroup;
+            gO.name = "cube " + faces[i].faceGroup + " " + i;
             LineRenderer lineRenderer = gO.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
             lineRenderer.widthMultiplier = 0.01f;

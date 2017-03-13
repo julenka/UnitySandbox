@@ -14,8 +14,21 @@ public partial class WireframeTesseract : MonoBehaviour
             this.d = d;
         }
         public int a, b, c, d;
-        public Color faceColor = Color.green;
-        public String faceGroup;
+        public Color faceColor;
+        public string faceGroup;
     }
 
+    [Serializable]
+    public class CubeParams
+    {
+        public CubeParams(String tag, Color cubeColor, int[] faceIndices)
+        {
+            this.faceIndices = faceIndices;
+            this.cubeColor = cubeColor;
+            this.tag = tag;
+        }
+        public int[] faceIndices;
+        public Color cubeColor;
+        public String tag;
+    }
 }
