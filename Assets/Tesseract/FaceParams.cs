@@ -30,5 +30,6 @@ public partial class WireframeTesseract : MonoBehaviour
         public int[] faceIndices;
         public Color cubeColor;
         public String tag;
+        public bool drawCube;
     }
 }

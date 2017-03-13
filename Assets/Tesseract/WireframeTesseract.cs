@@ -25,45 +25,18 @@ public partial class WireframeTesseract : MonoBehaviour
 
     public static Color[] cubeColors =
     {
-        new Color(176, 30, 0), // red
-        new Color(119,185,0), // green
-        new Color(0, 106,193), // blue
-        new Color(193,0,79), // pink
-        new Color(255,152,29), // yellow
-        new Color(114, 0, 172), // purple
-        new Color(0, 216, 204), // cyan
-        new Color(99,47,0) // brown
+        new Color32(176, 30, 0,0), // red
+        new Color32(119,185,0,0), // green
+        new Color32(0, 106,193,0), // blue
+        new Color32(193,0,79,0), // pink
+        new Color32(255,152,29,0), // yellow
+        new Color32(114, 0, 172,0), // purple
+        new Color32(0, 216, 204,0), // cyan
+        new Color32(99,47,0, 0) // brown
     };
 
     public CubeParams[] cubes;
 
-    public FaceParams[] faces =
-    {
-        new FaceParams(0, 1, 5, 4),
-        new FaceParams(0, 2, 6, 4),
-        new FaceParams(0, 8, 12, 4),
-        new FaceParams(0, 2, 3, 1),
-        new FaceParams(0, 1, 9, 8),
-        new FaceParams(0, 2, 10, 8),
-        new FaceParams(1, 3, 7, 5),
-        new FaceParams(1, 9, 13, 5),
-        new FaceParams(1, 3, 11, 9),
-        new FaceParams(2, 3, 7, 6),
-        new FaceParams(2, 3, 11, 10),
-        new FaceParams(2, 10, 14, 6),
-        new FaceParams(3, 11, 15, 7),
-        new FaceParams(4, 12, 13, 5),
-        new FaceParams(4, 6, 14, 12),
-        new FaceParams(4, 6, 7, 5),
-        new FaceParams(5, 7, 15, 13),
-        new FaceParams(6, 7, 15, 14),
-        new FaceParams(8, 10, 14, 12),
-        new FaceParams(8, 9, 13, 12),
-        new FaceParams(8, 9, 11, 10),
-        new FaceParams(9, 11, 15, 13),
-        new FaceParams(10, 11, 15, 14),
-        new FaceParams(0, 1, 2, 3)
-    };
 
 
     void Start()
@@ -103,10 +76,16 @@ public partial class WireframeTesseract : MonoBehaviour
             new Vector4(-1,-1,-1,-1)
         };
 
-        cubes = new CubeParams[] {
-            new CubeParams("red",   cubeColors[0], new int[] { 0, 1, 3, 6, 9, 15 }),
-            new CubeParams("green", cubeColors[1], new int[] { 2, 4, 7, 13, 19 })
-        };
+        int i = 0;
+        cubes = new CubeParams[8];
+        cubes[i] = new CubeParams("red", cubeColors[i++], new int[] { 0, 1, 3, 6, 9, 15 });
+        cubes[i] = new CubeParams("green", cubeColors[i++], new int[] { 2, 4, 7, 13, 19, 23 });
+        cubes[i] = new CubeParams("blue", cubeColors[i++], new int[] { 27, 5, 8, 10, 20 });
+        cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 32, 33, 11, 12, 17, 22 });
+        cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] {  });
+        cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { });
+        cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { });
+        cubes[i] = new CubeParams("brown", cubeColors[i++], new int[] { });
 
 
         ResetVertices();
@@ -128,7 +107,7 @@ public partial class WireframeTesseract : MonoBehaviour
         for (int i = 0; i < faces.Length; i++)
         {
             GameObject gO = new GameObject();
-            gO.name = "cube " + faces[i].faceGroup + " " + i;
+            gO.name = "face " + faces[i].faceGroup + " " + i;
             LineRenderer lineRenderer = gO.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
             lineRenderer.widthMultiplier = 0.01f;
@@ -198,11 +177,28 @@ public partial class WireframeTesseract : MonoBehaviour
         {
 
             FaceParams p = faces[i];
-            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], i, p.faceColor);
+            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], i, p.faceColor, p.faceGroup);
+        }
+        for (int i = 0; i < cubes.Length; i++)
+        {
+            if(cubes[i].drawCube)
+            {
+                DrawCube(cubes[i]);
+            }
         }
     }
 
-    void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int faceIndex, Color color)
+    void DrawCube(CubeParams cube)
+    {
+        for (int i = 0; i < cube.faceIndices.Length; i++)
+        {
+            int faceIndex = cube.faceIndices[i];
+            FaceParams p = faces[faceIndex];
+            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], faceIndex, cube.cubeColor, cube.tag);
+        }
+    }
+
+    void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int faceIndex, Color color, string name)
     {
         Vector3 center = 0.25f * (a + b + c + d);
         LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
@@ -212,6 +208,8 @@ public partial class WireframeTesseract : MonoBehaviour
         r.SetPosition(2, c + center * pushOutAmount);
         r.SetPosition(3, d + center * pushOutAmount);
         r.SetPosition(4, a + center * pushOutAmount);
+        r.gameObject.name = "cube " + name;
+
     }
 
 
@@ -243,4 +241,56 @@ public partial class WireframeTesseract : MonoBehaviour
         }
     }
 
+
+    private FaceParams[] faces =
+    {
+        new FaceParams(0, 1, 5, 4),
+        new FaceParams(0, 2, 6, 4),
+        new FaceParams(0, 8, 12, 4),
+        new FaceParams(0, 2, 3, 1),
+        new FaceParams(0, 1, 9, 8),
+        new FaceParams(0, 2, 10, 8),
+        new FaceParams(1, 3, 7, 5),
+        new FaceParams(1, 9, 13, 5),
+        new FaceParams(1, 3, 11, 9),
+        new FaceParams(2, 3, 7, 6),
+        new FaceParams(2, 3, 11, 10),
+        new FaceParams(2, 10, 14, 6),
+        new FaceParams(3, 11, 15, 7),
+        new FaceParams(4, 12, 13, 5),
+        new FaceParams(4, 6, 14, 12),
+        new FaceParams(4, 6, 7, 5),
+        new FaceParams(5, 7, 15, 13),
+        new FaceParams(6, 7, 15, 14),
+        new FaceParams(8, 10, 14, 12),
+        new FaceParams(8, 9, 13, 12),
+        new FaceParams(8, 9, 11, 10),
+        new FaceParams(9, 11, 15, 13),
+        new FaceParams(10, 11, 15, 14),
+        new FaceParams(0, 1, 3, 2),
+        new FaceParams(0, 1, 5, 4),
+        new FaceParams(0, 2, 6, 4),
+        new FaceParams(0, 8, 12, 4),
+        new FaceParams(0, 2, 3, 1),
+        new FaceParams(0, 1, 9, 8),
+        new FaceParams(0, 2, 10, 8),
+        new FaceParams(1, 3, 7, 5),
+        new FaceParams(1, 9, 13, 5),
+        new FaceParams(1, 3, 11, 9),
+        new FaceParams(2, 3, 7, 6),
+        new FaceParams(2, 3, 11, 10),
+        new FaceParams(2, 10, 14, 6),
+        new FaceParams(3, 11, 15, 7),
+        new FaceParams(4, 12, 13, 5),
+        new FaceParams(4, 6, 14, 12),
+        new FaceParams(4, 6, 7, 5),
+        new FaceParams(5, 7, 15, 13),
+        new FaceParams(6, 7, 15, 14),
+        new FaceParams(8, 10, 14, 12),
+        new FaceParams(8, 9, 13, 12),
+        new FaceParams(8, 9, 11, 10),
+        new FaceParams(9, 11, 15, 13),
+        new FaceParams(10, 11, 15, 14),
+        new FaceParams(0, 1, 3, 2)
+    };
 }
