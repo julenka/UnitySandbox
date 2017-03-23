@@ -86,8 +86,8 @@ public partial class WireframeTesseract : MonoBehaviour
         cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 33, 34, 11, 12, 17, 22 });
         cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] { 14, 16, 37, 38, 39, 41 });
         cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { 18, 21, 43, 44, 46 });
-        cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { });
-        cubes[i] = new CubeParams("brown", cubeColors[i++], new int[] { });
+        cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { 25, 26, 29, 35, 42 });
+        cubes[i] = new CubeParams("brown", cubeColors[i++], new int[] { 30, 31, 32, 36, 45 });
 
         i = 0;
         rotation = new RotationParams[6];

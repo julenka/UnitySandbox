@@ -26,6 +26,7 @@ public partial class WireframeTesseract : MonoBehaviour
             this.faceIndices = faceIndices;
             this.cubeColor = cubeColor;
             this.tag = tag;
+            this.drawCube = true;
         }
         public int[] faceIndices;
         public Color cubeColor;
