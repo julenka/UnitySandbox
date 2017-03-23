@@ -13,8 +13,18 @@ public partial class WireframeTesseract : MonoBehaviour
     [Range(0, 1)]
     public float pushOutAmount = 0.01f;
 
-    List<Axis4D> rotationOrder;
-    public Dictionary<Axis4D, float> rotation;
+    //Axis4D[] rotationOrder =
+    //{
+    //    Axis4D.yz,
+    //    Axis4D.xw,
+    //    Axis4D.yw,
+    //    Axis4D.zw,
+    //    Axis4D.xy,
+    //    Axis4D.xz
+    //};
+
+
+    //public Dictionary<Axis4D, float> rotation;
 
     List<Vector4> originalVerts;
     List<Vector4> rotatedVerts;
@@ -36,26 +46,18 @@ public partial class WireframeTesseract : MonoBehaviour
     };
 
     public CubeParams[] cubes;
-
+    public RotationParams[] rotation;
 
 
     void Start()
     {
-        rotationOrder = new List<Axis4D>();
-        rotationOrder.Add(Axis4D.yz);
-        rotationOrder.Add(Axis4D.xw);
-        rotationOrder.Add(Axis4D.yw);
-        rotationOrder.Add(Axis4D.zw);
-        rotationOrder.Add(Axis4D.xy);
-        rotationOrder.Add(Axis4D.xz);
-
-        rotation = new Dictionary<Axis4D, float>();
-        rotation.Add(Axis4D.xy, 0f);
-        rotation.Add(Axis4D.xz, 0f);
-        rotation.Add(Axis4D.xw, 0f);
-        rotation.Add(Axis4D.yz, 0f);
-        rotation.Add(Axis4D.yw, 0f);
-        rotation.Add(Axis4D.zw, 0f);
+        //rotation = new Dictionary<Axis4D, float>();
+        //rotation.Add(Axis4D.xy, 0f);
+        //rotation.Add(Axis4D.xz, 0f);
+        //rotation.Add(Axis4D.xw, 0f);
+        //rotation.Add(Axis4D.yz, 0f);
+        //rotation.Add(Axis4D.yw, 0f);
+        //rotation.Add(Axis4D.zw, 0f);
 
         originalVerts = new List<Vector4>(){
             new Vector4(1,1,1,1),
@@ -82,11 +84,19 @@ public partial class WireframeTesseract : MonoBehaviour
         cubes[i] = new CubeParams("green", cubeColors[i++], new int[] { 2, 4, 7, 13, 19, 24 });
         cubes[i] = new CubeParams("blue", cubeColors[i++], new int[] { 28, 5, 8, 10, 20 });
         cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 33, 34, 11, 12, 17, 22 });
-        cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] {  });
-        cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { });
+        cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] { 14, 16, 37, 38, 39, 41 });
+        cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { 18, 21, 43, 44, 46 });
         cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { });
         cubes[i] = new CubeParams("brown", cubeColors[i++], new int[] { });
 
+        i = 0;
+        rotation = new RotationParams[6];
+        rotation[i++] = new RotationParams(Axis4D.xy, 0f);
+        rotation[i++] = new RotationParams(Axis4D.xz, 0f);
+        rotation[i++] = new RotationParams(Axis4D.xw, 0f);
+        rotation[i++] = new RotationParams(Axis4D.yz, 0f);
+        rotation[i++] = new RotationParams(Axis4D.yw, 0f);
+        rotation[i++] = new RotationParams(Axis4D.zw, 0f);
 
         ResetVertices();
         SetupLineRenderer();
@@ -222,7 +232,7 @@ public partial class WireframeTesseract : MonoBehaviour
 
     void AddToRotationDictionary(Axis4D axis, float theta)
     {
-        rotation[axis] = (rotation[axis] + theta);
+        //rotation[axis] = (rotation[axis] + theta);
 
     }
 
@@ -230,15 +240,26 @@ public partial class WireframeTesseract : MonoBehaviour
     {
         ResetVertices();
 
-        foreach (Axis4D axis in rotationOrder)
+        foreach(RotationParams rp in rotation)
         {
-            float s = Mathf.Sin(Mathf.Deg2Rad * rotation[axis]);
-            float c = Mathf.Cos(Mathf.Deg2Rad * rotation[axis]);
+            var axis = rp.axis;
+            var amount = rp.amount;
+            float s = Mathf.Sin(Mathf.Deg2Rad * amount);
+            float c = Mathf.Cos(Mathf.Deg2Rad * amount);
             for (int i = 0; i < rotatedVerts.Count; i++)
             {
                 rotatedVerts[i] = TesseractUtils.GetRotatedVertex(axis, rotatedVerts[i], s, c);
             }
         }
+        //foreach (Axis4D axis in rotationOrder)
+        //{
+        //    float s = Mathf.Sin(Mathf.Deg2Rad * rotation[axis]);
+        //    float c = Mathf.Cos(Mathf.Deg2Rad * rotation[axis]);
+        //    for (int i = 0; i < rotatedVerts.Count; i++)
+        //    {
+        //        rotatedVerts[i] = TesseractUtils.GetRotatedVertex(axis, rotatedVerts[i], s, c);
+        //    }
+        //}
     }
 
 

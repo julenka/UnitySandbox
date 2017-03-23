@@ -58,3 +58,30 @@ public class CubeParamDrawer : PropertyDrawer
         EditorGUI.EndProperty();
     }
 }
+
+
+[CustomPropertyDrawer(typeof(WireframeTesseract.RotationParams))]
+public class RotationParamDrawer : PropertyDrawer
+{
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        EditorGUI.BeginProperty(position, label, property);
+        position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+        // Don't make child fields be indented
+        var indent = EditorGUI.indentLevel;
+        EditorGUI.indentLevel = 0;
+
+        // Calculate rects
+        var axisRect = new Rect(position.x, position.y, 30, position.height);
+        EditorGUI.PropertyField(axisRect, property.FindPropertyRelative("axis"), GUIContent.none);
+
+        var amountValueRect = new Rect(position.x + 40, position.y, position.width - 40, position.height);
+        EditorGUI.Slider(amountValueRect, property.FindPropertyRelative("amount"), 0, 360, GUIContent.none);
+
+        // Set indent back to what it was
+        EditorGUI.indentLevel = indent;
+
+        EditorGUI.EndProperty();
+    }
+}
