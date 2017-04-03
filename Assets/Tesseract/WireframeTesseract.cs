@@ -9,9 +9,10 @@ public partial class WireframeTesseract : MonoBehaviour
     [Header("Line Renderer")]
     public Color lineColor;
 
-    [Header("Debugging")]
     [Range(0, 1)]
-    public float pushOutAmount = 0.01f;
+    public float pushOutFaceAmount = 0.01f;
+    [Range(0, 1)]
+    public float pushOutCubeAmount = 0.01f;
 
     //Axis4D[] rotationOrder =
     //{
@@ -26,8 +27,8 @@ public partial class WireframeTesseract : MonoBehaviour
 
     //public Dictionary<Axis4D, float> rotation;
 
-    List<Vector4> originalVerts;
-    List<Vector4> rotatedVerts;
+
+List<Vector4> rotatedVerts;
 
     public bool freezeRotation = false;
     GameObject lineRedererRoot;
@@ -51,6 +52,25 @@ public partial class WireframeTesseract : MonoBehaviour
 
     void Start()
     {
+        int[] numbers = new int[48];
+        for(int j = 0; j < 48; j++)
+        {
+            numbers[j] = j;
+        }
+        int[] remove = new int[] { 0, 1, 3, 6, 9, 15, 2, 4, 7, 13, 19, 24, 28, 5, 8, 10, 20, 33, 34, 11, 12, 17, 22, 14, 16, 37, 38, 39, 41, 18, 21, 43, 44, 46, 25, 26, 29, 35, 42, 30, 31, 32, 36, 45 };
+        for (int k = 0; k < remove.Length; k++)
+        {
+            numbers[remove[k]] = -1;
+        }
+
+        for (int l = 0; l < numbers.Length; l++)
+        {
+            if(numbers[l] > 0)
+            {
+                print(numbers[l]);
+            }
+        }
+
         //rotation = new Dictionary<Axis4D, float>();
         //rotation.Add(Axis4D.xy, 0f);
         //rotation.Add(Axis4D.xz, 0f);
@@ -59,35 +79,17 @@ public partial class WireframeTesseract : MonoBehaviour
         //rotation.Add(Axis4D.yw, 0f);
         //rotation.Add(Axis4D.zw, 0f);
 
-        originalVerts = new List<Vector4>(){
-            new Vector4(1,1,1,1),
-            new Vector4(1,1,1,-1),
-            new Vector4(1,1,-1,1),
-            new Vector4(1,1,-1,-1),
-            new Vector4(1,-1,1,1),
-            new Vector4(1,-1,1,-1),
-            new Vector4(1,-1,-1,1),
-            new Vector4(1,-1,-1,-1),
-            new Vector4(-1,1,1,1),
-            new Vector4(-1,1,1,-1),
-            new Vector4(-1,1,-1,1),
-            new Vector4(-1,1,-1,-1),
-            new Vector4(-1,-1,1,1),
-            new Vector4(-1,-1,1,-1),
-            new Vector4(-1,-1,-1,1),
-            new Vector4(-1,-1,-1,-1)
-        };
 
         int i = 0;
         cubes = new CubeParams[8];
-        cubes[i] = new CubeParams("red", cubeColors[i++], new int[] { 0, 1, 3, 6, 9, 15 });
-        cubes[i] = new CubeParams("green", cubeColors[i++], new int[] { 2, 4, 7, 13, 19, 24 });
-        cubes[i] = new CubeParams("blue", cubeColors[i++], new int[] { 28, 5, 8, 10, 20 });
-        cubes[i] = new CubeParams("pink", cubeColors[i++], new int[] { 33, 34, 11, 12, 17, 22 });
-        cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] { 14, 16, 37, 38, 39, 41 });
-        cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { 18, 21, 43, 44, 46 });
-        cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[] { 25, 26, 29, 35, 42 });
-        cubes[i] = new CubeParams("brown", cubeColors[i++], new int[] { 30, 31, 32, 36, 45 });
+        cubes[i] = new CubeParams("red", cubeColors[i++], new int[]    { 0,  1,  3,  6,  9,  15 });
+        cubes[i] = new CubeParams("green", cubeColors[i++], new int[]  { 2,  4,  7,  13, 19, 24 });
+        cubes[i] = new CubeParams("blue", cubeColors[i++], new int[]   { 28, 5,  8,  10, 20, 47 });
+        cubes[i] = new CubeParams("pink", cubeColors[i++], new int[]   { 33, 34, 11, 12, 17, 22 });
+        cubes[i] = new CubeParams("yellow", cubeColors[i++], new int[] { 14, 16, 37, 27, 39, 41 });
+        cubes[i] = new CubeParams("purple", cubeColors[i++], new int[] { 18, 21, 43, 44, 46, 23 });
+        cubes[i] = new CubeParams("cyan", cubeColors[i++], new int[]   { 25, 26, 29, 35, 42, 38 });
+        cubes[i] = new CubeParams("brown", cubeColors[i++], new int[]  { 30, 31, 32, 36, 45, 40 });
 
         i = 0;
         rotation = new RotationParams[6];
@@ -101,6 +103,13 @@ public partial class WireframeTesseract : MonoBehaviour
         ResetVertices();
         SetupLineRenderer();
         SetupText();
+
+        for (i = 0; i < faces.Length; i++)
+        {
+            FaceParams p = faces[i];
+
+            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], Vector3.zero, i,  p.faceColor, p.faceGroup, p);
+        }
     }
 
     void ResetVertices()
@@ -183,42 +192,111 @@ public partial class WireframeTesseract : MonoBehaviour
 
     void DrawTesseract()
     {
-        for (int i = 0; i < faces.Length; i++)
-        {
-
-            FaceParams p = faces[i];
-            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], i, p.faceColor, p.faceGroup);
-        }
         for (int i = 0; i < cubes.Length; i++)
         {
-            if(cubes[i].drawCube)
+            if (cubes[i].drawCube)
             {
                 DrawCube(cubes[i]);
             }
+            else
+            {
+                HideCube(cubes[i]);
+            }
+        }
+    }
+
+    void HideCube(CubeParams cube)
+    {
+        for (int i = 0; i < cube.faceIndices.Length; i++)
+        {
+            HideFace(cube.faceIndices[i]);
         }
     }
 
     void DrawCube(CubeParams cube)
     {
+        // Cube center is average of all vertices
+        Vector4 cubeCenter = Vector3.zero;
+        int numVerts = 0;
         for (int i = 0; i < cube.faceIndices.Length; i++)
         {
             int faceIndex = cube.faceIndices[i];
             FaceParams p = faces[faceIndex];
-            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], faceIndex, cube.cubeColor, cube.tag);
+
+            cubeCenter += rotatedVerts[p.a];
+            cubeCenter += rotatedVerts[p.b];
+            cubeCenter += rotatedVerts[p.c];
+            cubeCenter += rotatedVerts[p.d];
+
+            numVerts += 4;
+        }
+        cubeCenter *= 1.0f / numVerts;
+
+        Debug.DrawLine(Vector3.zero, cubeCenter, Color.red);
+
+        for (int i = 0; i < cube.faceIndices.Length; i++)
+        {
+            int faceIndex = cube.faceIndices[i];
+            FaceParams p = faces[faceIndex];
+
+            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], cubeCenter, faceIndex, cube.cubeColor, cube.tag, p);
         }
     }
 
-    void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int faceIndex, Color color, string name)
+    void HideFace(int faceIndex)
     {
-        Vector3 center = 0.25f * (a + b + c + d);
         LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
+        r.enabled = false;
+        for (int i = 0; i < r.transform.childCount; i++)
+        {
+            Transform t = r.transform.GetChild(i);
+            Destroy(t.gameObject);
+        }
+    }
+
+    void AddTmpDebugTxt(Vector3 position, string name, Transform parent)
+    {
+        if (true) return;
+        GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        tmp.transform.localScale = Vector3.one * 0.1f;
+        tmp.transform.parent = parent;
+        tmp.name = name;
+        tmp.transform.localPosition = position;
+    }
+
+    void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 cubeCenter, int faceIndex, Color color, string name, FaceParams p)
+    {
+
+        // might be able to do this with matrices (push, pop) if it gets more complex
+        Vector3 pushOutCube = cubeCenter * pushOutCubeAmount;
+        Vector3 faceCenter = 0.25f * (a + b + c + d);
+        Vector3 pushOutFace = (faceCenter - cubeCenter) * pushOutFaceAmount;
+
+        LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
+
+        for (int i = 0; i < r.transform.childCount; i++)
+        {
+            Transform t = r.transform.GetChild(i);
+            Destroy(t.gameObject);
+        }
+
         r.colorGradient = CreateGradient(color, color);
-        r.SetPosition(0, a + center * pushOutAmount);
-        r.SetPosition(1, b + center * pushOutAmount);
-        r.SetPosition(2, c + center * pushOutAmount);
-        r.SetPosition(3, d + center * pushOutAmount);
-        r.SetPosition(4, a + center * pushOutAmount);
+
+        r.SetPosition(0, a + pushOutCube + pushOutFace);
+        r.SetPosition(1, b + pushOutCube + pushOutFace);
+        r.SetPosition(2, c + pushOutCube + pushOutFace);
+        r.SetPosition(3, d + pushOutCube + pushOutFace);
+        r.SetPosition(4, a + pushOutCube + pushOutFace);
+
+        AddTmpDebugTxt(a + pushOutCube + pushOutFace, originalVerts[p.a].ToString(), r.transform);
+        AddTmpDebugTxt(b + pushOutCube + pushOutFace, originalVerts[p.b].ToString(), r.transform);
+        AddTmpDebugTxt(c + pushOutCube + pushOutFace, originalVerts[p.c].ToString(), r.transform);
+        AddTmpDebugTxt(d + pushOutCube + pushOutFace, originalVerts[p.d].ToString(), r.transform);
+
         r.gameObject.name = "cube " + name;
+        r.enabled = true;
+
+
 
     }
 
@@ -240,7 +318,7 @@ public partial class WireframeTesseract : MonoBehaviour
     {
         ResetVertices();
 
-        foreach(RotationParams rp in rotation)
+        foreach (RotationParams rp in rotation)
         {
             var axis = rp.axis;
             var amount = rp.amount;
@@ -261,6 +339,25 @@ public partial class WireframeTesseract : MonoBehaviour
         //    }
         //}
     }
+
+    private Vector4[] originalVerts = new Vector4[] {
+            new Vector4(1,1,1,1),
+            new Vector4(1,1,1,-1),
+            new Vector4(1,1,-1,1),
+            new Vector4(1,1,-1,-1),
+            new Vector4(1,-1,1,1),
+            new Vector4(1,-1,1,-1),
+            new Vector4(1,-1,-1,1),
+            new Vector4(1,-1,-1,-1), // 7
+            new Vector4(-1,1,1,1),
+            new Vector4(-1,1,1,-1),
+            new Vector4(-1,1,-1,1),
+            new Vector4(-1,1,-1,-1),
+            new Vector4(-1,-1,1,1),  // 12
+            new Vector4(-1,-1,1,-1),
+            new Vector4(-1,-1,-1,1), // 14
+            new Vector4(-1,-1,-1,-1) // 15
+        };
 
 
     private FaceParams[] faces =
@@ -288,11 +385,11 @@ public partial class WireframeTesseract : MonoBehaviour
         new FaceParams(8, 9, 11, 10),
         new FaceParams(9, 11, 15, 13),
         new FaceParams(10, 11, 15, 14),
-        new FaceParams(0, 1, 3, 2),
+        new FaceParams(14, 12, 13, 15),
         new FaceParams(0, 1, 5, 4),
         new FaceParams(0, 2, 6, 4),
         new FaceParams(0, 8, 12, 4),
-        new FaceParams(0, 2, 3, 1),
+        new FaceParams(13, 15, 14, 12),
         new FaceParams(0, 1, 9, 8),
         new FaceParams(0, 2, 10, 8),
         new FaceParams(1, 3, 7, 5),
