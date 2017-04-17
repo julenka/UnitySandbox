@@ -4,35 +4,21 @@ using System.Collections.Generic;
 
 public partial class WireframeTesseract : MonoBehaviour
 {
-    public TextMesh textPrefab;
-
-    [Header("Line Renderer")]
     public Color lineColor;
-
-    [Range(0, 1)]
+    [Range(0, 5)]
     public float pushOutFaceAmount = 0.01f;
-    [Range(0, 1)]
+    [Range(0, 5)]
     public float pushOutCubeAmount = 0.01f;
 
-    //Axis4D[] rotationOrder =
-    //{
-    //    Axis4D.yz,
-    //    Axis4D.xw,
-    //    Axis4D.yw,
-    //    Axis4D.zw,
-    //    Axis4D.xy,
-    //    Axis4D.xz
-    //};
+    public bool drawDebug;
 
 
-    //public Dictionary<Axis4D, float> rotation;
-
-
-List<Vector4> rotatedVerts;
+    List<Vector4> rotatedVerts;
 
     public bool freezeRotation = false;
     GameObject lineRedererRoot;
     GameObject textRoot;
+
 
     public static Color[] cubeColors =
     {
@@ -52,34 +38,6 @@ List<Vector4> rotatedVerts;
 
     void Start()
     {
-        int[] numbers = new int[48];
-        for(int j = 0; j < 48; j++)
-        {
-            numbers[j] = j;
-        }
-        int[] remove = new int[] { 0, 1, 3, 6, 9, 15, 2, 4, 7, 13, 19, 24, 28, 5, 8, 10, 20, 33, 34, 11, 12, 17, 22, 14, 16, 37, 38, 39, 41, 18, 21, 43, 44, 46, 25, 26, 29, 35, 42, 30, 31, 32, 36, 45 };
-        for (int k = 0; k < remove.Length; k++)
-        {
-            numbers[remove[k]] = -1;
-        }
-
-        for (int l = 0; l < numbers.Length; l++)
-        {
-            if(numbers[l] > 0)
-            {
-                print(numbers[l]);
-            }
-        }
-
-        //rotation = new Dictionary<Axis4D, float>();
-        //rotation.Add(Axis4D.xy, 0f);
-        //rotation.Add(Axis4D.xz, 0f);
-        //rotation.Add(Axis4D.xw, 0f);
-        //rotation.Add(Axis4D.yz, 0f);
-        //rotation.Add(Axis4D.yw, 0f);
-        //rotation.Add(Axis4D.zw, 0f);
-
-
         int i = 0;
         cubes = new CubeParams[8];
         cubes[i] = new CubeParams("red", cubeColors[i++], new int[]    { 0,  1,  3,  6,  9,  15 });
@@ -102,7 +60,6 @@ List<Vector4> rotatedVerts;
 
         ResetVertices();
         SetupLineRenderer();
-        SetupText();
 
         for (i = 0; i < faces.Length; i++)
         {
@@ -153,40 +110,9 @@ List<Vector4> rotatedVerts;
         return gradient;
     }
 
-    void SetupText()
-    {
-        if (textPrefab != null)
-        {
-            textRoot = new GameObject();
-            textRoot.transform.parent = transform;
-            textRoot.name = "text root";
-            for (int i = 0; i < rotatedVerts.Count; i++)
-            {
-                TextMesh t = Instantiate(textPrefab);
-                t.text = "" + i;
-                t.transform.parent = textRoot.transform;
-                t.name = "vertex " + i;
-            }
-        }
-    }
-
-    void UpdateText()
-    {
-        for (int i = 0; i < rotatedVerts.Count; i++)
-        {
-            GameObject o = textRoot.transform.GetChild(i).gameObject;
-            o.transform.position = rotatedVerts[i];
-            //o.transform.rotation = Quaternion.LookRotation(Camera.main.transform.position - o.transform.position);
-        }
-    }
-
     void Update()
     {
         DrawTesseract();
-        if (textPrefab != null)
-        {
-            UpdateText();
-        }
     }
 
 
@@ -232,7 +158,10 @@ List<Vector4> rotatedVerts;
         }
         cubeCenter *= 1.0f / numVerts;
 
-        Debug.DrawLine(Vector3.zero, cubeCenter, Color.red);
+        if (drawDebug)
+        {
+            Debug.DrawLine(Vector3.zero, cubeCenter, Color.red);
+        }
 
         for (int i = 0; i < cube.faceIndices.Length; i++)
         {
@@ -252,16 +181,6 @@ List<Vector4> rotatedVerts;
             Transform t = r.transform.GetChild(i);
             Destroy(t.gameObject);
         }
-    }
-
-    void AddTmpDebugTxt(Vector3 position, string name, Transform parent)
-    {
-        if (true) return;
-        GameObject tmp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        tmp.transform.localScale = Vector3.one * 0.1f;
-        tmp.transform.parent = parent;
-        tmp.name = name;
-        tmp.transform.localPosition = position;
     }
 
     void DrawFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 cubeCenter, int faceIndex, Color color, string name, FaceParams p)
@@ -288,16 +207,8 @@ List<Vector4> rotatedVerts;
         r.SetPosition(3, d + pushOutCube + pushOutFace);
         r.SetPosition(4, a + pushOutCube + pushOutFace);
 
-        AddTmpDebugTxt(a + pushOutCube + pushOutFace, originalVerts[p.a].ToString(), r.transform);
-        AddTmpDebugTxt(b + pushOutCube + pushOutFace, originalVerts[p.b].ToString(), r.transform);
-        AddTmpDebugTxt(c + pushOutCube + pushOutFace, originalVerts[p.c].ToString(), r.transform);
-        AddTmpDebugTxt(d + pushOutCube + pushOutFace, originalVerts[p.d].ToString(), r.transform);
-
         r.gameObject.name = "cube " + name;
         r.enabled = true;
-
-
-
     }
 
 
@@ -310,8 +221,18 @@ List<Vector4> rotatedVerts;
 
     void AddToRotationDictionary(Axis4D axis, float theta)
     {
-        //rotation[axis] = (rotation[axis] + theta);
-
+        for (int i = 0; i < rotation.Length; i++)
+        {
+            RotationParams rp = rotation[i];
+            if (rp.axis == axis)
+            {
+                rp.amount += theta;
+                if(rp.amount > 360)
+                {
+                    rp.amount -= 360;
+                }
+            }
+        }
     }
 
     public void ApplyRotationToVerts()
@@ -329,15 +250,6 @@ List<Vector4> rotatedVerts;
                 rotatedVerts[i] = TesseractUtils.GetRotatedVertex(axis, rotatedVerts[i], s, c);
             }
         }
-        //foreach (Axis4D axis in rotationOrder)
-        //{
-        //    float s = Mathf.Sin(Mathf.Deg2Rad * rotation[axis]);
-        //    float c = Mathf.Cos(Mathf.Deg2Rad * rotation[axis]);
-        //    for (int i = 0; i < rotatedVerts.Count; i++)
-        //    {
-        //        rotatedVerts[i] = TesseractUtils.GetRotatedVertex(axis, rotatedVerts[i], s, c);
-        //    }
-        //}
     }
 
     private Vector4[] originalVerts = new Vector4[] {
