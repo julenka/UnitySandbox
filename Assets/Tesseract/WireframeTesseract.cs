@@ -13,10 +13,20 @@ public partial class WireframeTesseract : MonoBehaviour
     public bool drawDebug;
 
 
+    public enum Projection
+    {
+        XYZ,
+        XYW,
+        WYZ,
+        XWZ
+    };
+
+    public Projection projection = Projection.XYZ;
+
     List<Vector4> rotatedVerts;
 
     public bool freezeRotation = false;
-    GameObject lineRedererRoot;
+    GameObject lineRendererRoot;
     GameObject textRoot;
 
 
@@ -77,9 +87,9 @@ public partial class WireframeTesseract : MonoBehaviour
 
     void SetupLineRenderer()
     {
-        lineRedererRoot = new GameObject();
-        lineRedererRoot.transform.parent = transform;
-        lineRedererRoot.name = "line renderers";
+        lineRendererRoot = new GameObject();
+        lineRendererRoot.transform.parent = transform;
+        lineRendererRoot.name = "line renderers";
         for (int i = 0; i < faces.Length; i++)
         {
             GameObject gO = new GameObject();
@@ -93,9 +103,11 @@ public partial class WireframeTesseract : MonoBehaviour
             lineRenderer.numCapVertices = 5;
             lineRenderer.numCornerVertices = 0;
             lineRenderer.useWorldSpace = false;
-            gO.transform.parent = lineRedererRoot.transform;
+            gO.transform.parent = lineRendererRoot.transform;
             lineRenderer.colorGradient = CreateGradient(lineColor, lineColor);
         }
+        lineRendererRoot.transform.localPosition = Vector3.zero;
+        lineRendererRoot.transform.localScale = Vector3.one;
     }
 
     private Gradient CreateGradient(Color startColor, Color endColor)
@@ -168,13 +180,38 @@ public partial class WireframeTesseract : MonoBehaviour
             int faceIndex = cube.faceIndices[i];
             FaceParams p = faces[faceIndex];
 
-            DrawFace(rotatedVerts[p.a], rotatedVerts[p.b], rotatedVerts[p.c], rotatedVerts[p.d], cubeCenter, faceIndex, cube.cubeColor, cube.tag, p);
+            DrawFace(
+                VectorFromProjection(projection, rotatedVerts[p.a]), 
+                VectorFromProjection(projection, rotatedVerts[p.b]), 
+                VectorFromProjection(projection, rotatedVerts[p.c]), 
+                VectorFromProjection(projection, rotatedVerts[p.d]), 
+                VectorFromProjection(projection, cubeCenter), 
+                faceIndex, 
+                cube.cubeColor, 
+                cube.tag, p);
         }
+    }
+
+    Vector3 VectorFromProjection(Projection p, Vector4 input)
+    {
+        switch(p)
+        {
+            case Projection.XYW:
+                return new Vector3(input.x, input.y, input.w);
+            case Projection.XWZ:
+                return new Vector3(input.x, input.w, input.z);
+            case Projection.WYZ:
+                return new Vector3(input.w, input.y, input.z);
+            case Projection.XYZ:
+                return new Vector3(input.x, input.y, input.z);
+        }
+
+        throw new System.Exception("Invalid parameter p " + p);
     }
 
     void HideFace(int faceIndex)
     {
-        LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
+        LineRenderer r = lineRendererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
         r.enabled = false;
         for (int i = 0; i < r.transform.childCount; i++)
         {
@@ -191,7 +228,7 @@ public partial class WireframeTesseract : MonoBehaviour
         Vector3 faceCenter = 0.25f * (a + b + c + d);
         Vector3 pushOutFace = (faceCenter - cubeCenter) * pushOutFaceAmount;
 
-        LineRenderer r = lineRedererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
+        LineRenderer r = lineRendererRoot.transform.GetChild(faceIndex).GetComponent<LineRenderer>();
 
         for (int i = 0; i < r.transform.childCount; i++)
         {
