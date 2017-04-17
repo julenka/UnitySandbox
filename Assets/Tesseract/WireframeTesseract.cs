@@ -29,7 +29,6 @@ public partial class WireframeTesseract : MonoBehaviour
     GameObject lineRendererRoot;
     GameObject textRoot;
 
-
     public static Color[] cubeColors =
     {
         new Color32(176, 30, 0,0), // red
@@ -45,6 +44,37 @@ public partial class WireframeTesseract : MonoBehaviour
     public CubeParams[] cubes;
     public RotationParams[] rotation;
 
+    private float goalSize = -1;
+    private float goalSize2 = -1;
+    public void Expand()
+    {
+        goalSize = 1;
+        goalSize2 = 0;
+    }
+
+    public void ExpandAgain()
+    {
+        goalSize = 2;
+        goalSize2 = 0.5f;
+    }
+
+    public void Contract()
+    {
+        goalSize = 0;
+        goalSize2 = 0;
+    }
+
+    private void UpdateExpansion()
+    {
+        if(goalSize >= 0)
+        {
+            pushOutCubeAmount += (goalSize - pushOutCubeAmount) * 0.3f;
+        }
+        if (goalSize2 >= 0)
+        {
+            pushOutFaceAmount += (goalSize2 - pushOutFaceAmount) * 0.3f;
+        }
+    }
 
     void Start()
     {
@@ -85,6 +115,8 @@ public partial class WireframeTesseract : MonoBehaviour
         rotatedVerts.AddRange(originalVerts);
     }
 
+    public Material lineMaterial;
+
     void SetupLineRenderer()
     {
         lineRendererRoot = new GameObject();
@@ -95,8 +127,8 @@ public partial class WireframeTesseract : MonoBehaviour
             GameObject gO = new GameObject();
             gO.name = "face " + faces[i].faceGroup + " " + i;
             LineRenderer lineRenderer = gO.AddComponent<LineRenderer>();
-            lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-            lineRenderer.widthMultiplier = 0.01f;
+            lineRenderer.material = lineMaterial;
+            lineRenderer.widthMultiplier = 0.002f;
             lineRenderer.numCapVertices = 5;
             lineRenderer.numCornerVertices = 5;
             lineRenderer.numPositions = 5;
@@ -125,6 +157,7 @@ public partial class WireframeTesseract : MonoBehaviour
     void Update()
     {
         DrawTesseract();
+        UpdateExpansion();
     }
 
 

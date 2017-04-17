@@ -17,6 +17,12 @@ public class TesseractVoiceControl : MonoBehaviour
             () => tesseract.transform.localScale *= 1.25f);
         VoiceController.Instance.AddKeyword("smaller", KeyCode.Keypad3,
             () => tesseract.transform.localScale *= 0.75f);
+        VoiceController.Instance.AddKeyword("expand", KeyCode.Keypad4,
+            () => tesseract.Expand());
+        VoiceController.Instance.AddKeyword("expand again", KeyCode.Keypad6,
+            () => tesseract.ExpandAgain());
+        VoiceController.Instance.AddKeyword("contract", KeyCode.Keypad5,
+            () => tesseract.Contract());
     }
 
     void Update()
